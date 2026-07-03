@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Solární plot — plot, který vyrábí</title>
+</head>
+<body>
+<style>
+  :root{
+    --ink:#171a20;
+    --paper:#ffffff;
+    --mist:#f4f4f4;
+    --grey:#5c5e62;
+    --line:#d0d1d2;
+    --blue:#3e6ae1;
+    --walnut:#5a4032;
+    --teak:#a97c50;
+    --antik:#9a938a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--paper);
+    -webkit-font-smoothing:antialiased;line-height:1.5;
+  }
+  /* ---------- NAV ---------- */
+  .nav{
+    position:fixed;inset:0 0 auto 0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 32px;height:56px;
+    background:rgba(255,255,255,0);transition:background .3s,box-shadow .3s;
+  }
+  .nav.solid{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(23,26,32,.08)}
+  .nav__brand{font-size:15px;font-weight:700;letter-spacing:.34em;text-decoration:none;color:var(--ink);text-transform:uppercase}
+  .nav__links{display:flex;gap:4px;list-style:none}
+  .nav__links a{
+    text-decoration:none;color:var(--ink);font-size:13.5px;font-weight:500;
+    padding:7px 14px;border-radius:4px;transition:background .2s;
+  }
+  .nav__links a:hover,.nav__links a:focus-visible{background:rgba(23,26,32,.06)}
+  @media(max-width:760px){.nav__links{display:none}}
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-block;text-align:center;text-decoration:none;cursor:pointer;
+    font:inherit;font-size:14px;font-weight:500;
+    min-width:240px;padding:9px 24px;border-radius:4px;border:0;
+    transition:opacity .2s,transform .2s;
+  }
+  .btn:hover{opacity:.86}
+  .btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  .btn--dark{background:rgba(23,26,32,.85);color:#fff}
+  .btn--light{background:rgba(255,255,255,.72);color:#2f3238}
+  .btn--blue{background:var(--blue);color:#fff}
+  @media(max-width:560px){.btn{min-width:88vw}}
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;height:100vh;min-height:640px;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .hero__scene{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1}
+  .hero__copy{margin-top:15vh;text-align:center;padding:0 20px}
+  .hero__copy h1{font-size:clamp(32px,5vw,44px);font-weight:600;letter-spacing:-.01em}
+  .hero__copy p{font-size:15px;margin-top:6px;color:#2f3238}
+  .hero__copy p a{color:inherit}
+  .hero__cta{
+    position:absolute;bottom:9vh;left:0;right:0;
+    display:flex;gap:20px;justify-content:center;flex-wrap:wrap;padding:0 20px;
+  }
+  /* ---------- SECTIONS ---------- */
+  .sec{padding:96px 24px}
+  .sec--mist{background:var(--mist)}
+  .sec--dark{background:var(--ink);color:#fff}
+  .sec__inner{max-width:1080px;margin:0 auto}
+  .sec__head{max-width:640px;margin:0 auto 56px;text-align:center}
+  .sec__head h2{font-size:clamp(26px,3.4vw,34px);font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+  .sec__head p{margin-top:12px;color:var(--grey);font-size:15px}
+  .sec--dark .sec__head p{color:#a6a8ab}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:12px}
+  .sec--dark .eyebrow{color:#8e9093}
+  /* ---------- STATS ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;max-width:960px;margin:0 auto}
+  @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{text-align:center}
+  .stat b{display:block;font-size:clamp(26px,3.2vw,36px);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .stat span{display:block;margin-top:4px;font-size:13px;color:var(--grey)}
+  /* ---------- FEATURES ---------- */
+  .feat{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;max-width:1080px;margin:0 auto}
+  @media(max-width:860px){.feat{grid-template-columns:1fr;gap:32px}}
+  .feat h3{font-size:clamp(24px,3vw,30px);font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+  .feat p{margin-top:14px;font-size:15px;color:var(--grey);max-width:52ch}
+  .sec--dark .feat p{color:#a6a8ab}
+  .feat ul{margin-top:18px;list-style:none;display:grid;gap:10px}
+  .feat li{font-size:14px;padding-left:18px;position:relative}
+  .feat li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--blue)}
+  .feat__visual{border-radius:8px;overflow:hidden;background:var(--mist)}
+  .sec--dark .feat__visual{background:#22262d}
+  .feat__visual svg{display:block;width:100%;height:auto}
+  .swatches{display:flex;gap:14px;margin-top:22px}
+  .swatch{width:52px;text-align:center;font-size:11px;color:inherit}
+  .swatch i{display:block;height:52px;border-radius:50%;margin-bottom:6px;border:2px solid rgba(255,255,255,.25)}
+  /* ---------- COMPARE ---------- */
+  .cmp-wrap{overflow-x:auto}
+  .cmp{width:100%;max-width:860px;margin:0 auto;border-collapse:collapse;font-size:14.5px}
+  .cmp th,.cmp td{padding:16px 18px;text-align:left;border-bottom:1px solid var(--line)}
+  .cmp thead th{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--grey);font-weight:600}
+  .cmp td:nth-child(3){font-weight:600}
+  .cmp tbody tr:last-child td{border-bottom:0}
+  .cmp .num{font-variant-numeric:tabular-nums}
+  /* ---------- CONFIGURATOR ---------- */
+  .cfg{display:grid;grid-template-columns:1.35fr 1fr;gap:56px;max-width:1080px;margin:0 auto;align-items:start}
+  @media(max-width:900px){.cfg{grid-template-columns:1fr}}
+  .cfg__preview{border-radius:8px;overflow:hidden;background:linear-gradient(#e9eef2,#f6f2ea)}
+  .cfg__preview svg{display:block;width:100%;height:auto}
+  .cfg__controls{margin-top:32px;display:grid;gap:32px}
+  .ctl label,.ctl .lbl{display:flex;justify-content:space-between;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--grey);margin-bottom:12px}
+  .ctl output{color:var(--ink);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--ink);height:32px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .seg button{flex:1;font:inherit;font-size:13.5px;padding:11px 6px;background:#fff;border:0;cursor:pointer;color:var(--grey)}
+  .seg button+button{border-left:1px solid var(--line)}
+  .seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+  .seg button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+  .colorpick{display:flex;gap:16px}
+  .colorpick button{
+    width:46px;height:46px;border-radius:50%;cursor:pointer;border:2px solid transparent;
+    box-shadow:inset 0 0 0 2px #fff;
+  }
+  .colorpick button[aria-pressed=true]{border-color:var(--ink)}
+  .colorpick button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  .toggle{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .toggle .t-copy b{font-size:14.5px;font-weight:600;display:block}
+  .toggle .t-copy span{font-size:13px;color:var(--grey)}
+  .switch{position:relative;width:48px;height:28px;flex:none}
+  .switch input{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;margin:0}
+  .switch i{position:absolute;inset:0;border-radius:999px;background:#c7c8ca;transition:background .2s}
+  .switch i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
+  .switch input:checked+i{background:var(--ink)}
+  .switch input:checked+i::after{transform:translateX(20px)}
+  .switch input:focus-visible+i{outline:2px solid var(--blue);outline-offset:2px}
+  /* summary card */
+  .sum{
+    position:sticky;top:76px;border:1px solid var(--line);border-radius:8px;padding:28px;
+    display:grid;gap:0;background:#fff;
+  }
+  .sum h3{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--grey)}
+  .sum .price{font-size:clamp(30px,3.4vw,38px);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-top:6px}
+  .sum .vat{font-size:12.5px;color:var(--grey);margin-top:2px}
+  .sum dl{margin-top:22px;border-top:1px solid var(--line)}
+  .sum dl div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .sum dt{color:var(--grey)}
+  .sum dd{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+  .sum .nzu{margin-top:14px;font-size:13px;padding:10px 12px;border-radius:6px;background:var(--mist);color:var(--grey)}
+  .sum .nzu.ok{background:#eaf3ec;color:#1e6b34}
+  .sum .btn{margin-top:18px;min-width:0;width:100%}
+  .sum .note{margin-top:12px;font-size:11.5px;color:var(--grey);line-height:1.45}
+  /* ---------- SPECS ---------- */
+  .specs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#33373e;border-radius:8px;overflow:hidden;max-width:1080px;margin:0 auto}
+  @media(max-width:860px){.specs{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.specs{grid-template-columns:1fr}}
+  .spec{background:var(--ink);padding:24px}
+  .spec dt{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#8e9093}
+  .spec dd{margin-top:8px;font-size:14.5px;line-height:1.55}
+  /* ---------- FAQ ---------- */
+  .faq{max-width:720px;margin:0 auto;display:grid;gap:0}
+  .faq details{border-bottom:1px solid var(--line)}
+  .faq summary{
+    cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;
+    padding:20px 4px;font-size:15.5px;font-weight:600;
+  }
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";font-size:22px;font-weight:400;color:var(--grey);transition:transform .2s}
+  .faq details[open] summary::after{transform:rotate(45deg)}
+  .faq details p{padding:0 4px 22px;color:var(--grey);font-size:14.5px;max-width:62ch}
+  /* ---------- FOOTER ---------- */
+  footer{padding:48px 24px 64px;background:var(--mist)}
+  footer .sec__inner{text-align:center}
+  footer p{font-size:12px;color:var(--grey);max-width:70ch;margin:0 auto}
+  footer .brandline{font-size:13px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--ink);margin-bottom:14px}
+  /* reveal */
+  .rv{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+  .rv.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+</style>
+
+<nav class="nav" id="nav" aria-label="Hlavní navigace">
+  <a class="nav__brand" href="#top">Solární&nbsp;plot</a>
+  <ul class="nav__links">
+    <li><a href="#energie">Energie</a></li>
+    <li><a href="#design">Design</a></li>
+    <li><a href="#srovnani">Srovnání</a></li>
+    <li><a href="#konfigurator">Konfigurátor</a></li>
+    <li><a href="#specifikace">Specifikace</a></li>
+    <li><a href="#kontakt">Kontakt</a></li>
+  </ul>
+</nav>
+
+<header class="hero" id="top">
+  <svg class="hero__scene" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#dce6ee"/>
+        <stop offset=".55" stop-color="#eae7dd"/>
+        <stop offset=".8" stop-color="#f3e3c9"/>
+      </linearGradient>
+      <radialGradient id="sun" cx=".72" cy=".78" r=".5">
+        <stop offset="0" stop-color="#ffe9bd" stop-opacity=".9"/>
+        <stop offset="1" stop-color="#ffe9bd" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#c8c4b4"/>
+        <stop offset="1" stop-color="#b3b0a2"/>
+      </linearGradient>
+      <linearGradient id="panelG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#232935"/>
+        <stop offset=".5" stop-color="#141922"/>
+        <stop offset="1" stop-color="#0d1118"/>
+      </linearGradient>
+      <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".14"/>
+        <stop offset=".4" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <rect width="1440" height="760" fill="url(#sky)"/>
+    <rect width="1440" height="760" fill="url(#sun)"/>
+    <!-- dům v pozadí -->
+    <g opacity=".9">
+      <rect x="980" y="330" width="300" height="180" fill="#e8e4da"/>
+      <polygon points="965,330 1130,240 1295,330" fill="#3b3f46"/>
+      <rect x="1020" y="370" width="52" height="70" fill="#b9c4cc"/>
+      <rect x="1105" y="370" width="52" height="70" fill="#b9c4cc"/>
+      <rect x="1190" y="370" width="52" height="140" fill="#7a8087"/>
+      <!-- střešní FVE decentně -->
+      <polygon points="1010,318 1128,254 1180,282 1056,344" fill="#151a22" opacity=".85"/>
+    </g>
+    <!-- zem -->
+    <rect x="0" y="510" width="1440" height="250" fill="url(#ground)"/>
+    <!-- PLOT: 5 polí -->
+    <g id="heroFence" transform="translate(60,300)">
+      <!-- sloupky + pole se generují JS-em -->
+    </g>
+  </svg>
+  <div class="hero__copy rv in">
+    <h1>Solární plot</h1>
+    <p>Prémiové oplocení, které vyrábí elektřinu</p>
+  </div>
+  <div class="hero__cta">
+    <a class="btn btn--dark" href="#konfigurator">Sestavit vlastní</a>
+    <a class="btn btn--light" href="#energie">Zjistit více</a>
+  </div>
+</header>
+
+<section class="sec">
+  <div class="stats rv">
+    <div class="stat"><b>435&nbsp;W</b><span>výkon jednoho pole</span></div>
+    <div class="stat"><b>21,3&nbsp;%</b><span>účinnost panelu N-TOPCon</span></div>
+    <div class="stat"><b>25+&nbsp;let</b><span>životnost bez údržby</span></div>
+    <div class="stat"><b>0&nbsp;m²</b><span>zabrané země navíc</span></div>
+  </div>
+</section>
+
+<section class="sec sec--mist" id="energie">
+  <div class="feat rv">
+    <div>
+      <p class="eyebrow">Energie</p>
+      <h3>Vyrábí, i&nbsp;když jen stojí</h3>
+      <p>Každé pole plotu nese tři celočerné fotovoltaické panely Tier&nbsp;1 výrobce. Svislá plocha orientovaná na jih, východ nebo západ vyrábí elektřinu po&nbsp;celý den — a&nbsp;v&nbsp;zimě, kdy si střešní elektrárny berou pauzu, jí svislý panel se sněhem za&nbsp;zády svědčí nejvíc.</p>
+      <ul>
+        <li>~650 kWh ročně z&nbsp;každé kWp na&nbsp;jižní straně</li>
+        <li>3× 145 W panel v&nbsp;každém poli 1,8&nbsp;×&nbsp;1,8&nbsp;m</li>
+        <li>N-TOPCon články — vyšší výnos při slabém světle</li>
+      </ul>
+    </div>
+    <div class="feat__visual" aria-hidden="true">
+      <svg viewBox="0 0 520 340">
+        <rect width="520" height="340" fill="#e9eef2"/>
+        <g id="featFence1" transform="translate(60,50)"></g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec--dark" id="design">
+  <div class="feat rv">
+    <div class="feat__visual" aria-hidden="true">
+      <svg viewBox="0 0 520 340">
+        <rect width="520" height="340" fill="#22262d"/>
+        <g id="featFence2" transform="translate(60,50)"></g>
+      </svg>
+    </div>
+    <div>
+      <p class="eyebrow">Design</p>
+      <h3>Vzhled dřeva. Bez&nbsp;údržby.</h3>
+      <p>Dřevoplastové desky (WPC) z&nbsp;recyklovaných polymerů a&nbsp;dřevních vláken vypadají jako dřevo, ale nikdy je nebudete brousit ani natírat. Hliníkové sloupky, prolamovaný dekorační pás a&nbsp;tři barevné varianty desek.</p>
+      <div class="swatches">
+        <div class="swatch"><i style="background:#5a4032"></i>Ořech</div>
+        <div class="swatch"><i style="background:#a97c50"></i>Teak</div>
+        <div class="swatch"><i style="background:#9a938a"></i>Antik</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="baterie">
+  <div class="feat rv">
+    <div>
+      <p class="eyebrow">Nezávislost</p>
+      <h3>Energie i&nbsp;po&nbsp;setmění</h3>
+      <p>S&nbsp;bateriovým úložištěm LFP využijete vyrobenou elektřinu večer, kdy je nejdražší. Sestava s&nbsp;baterií o&nbsp;kapacitě alespoň rovné výkonu plotu splňuje technické podmínky programu Nová zelená úsporám — včetně minimální účinnosti panelů, kterou plot přesahuje s&nbsp;rezervou.</p>
+      <ul>
+        <li>Hybridní měnič dle EN&nbsp;50549-1, monitoring v&nbsp;mobilu</li>
+        <li>Modulární baterie — kapacita roste s&nbsp;plotem</li>
+        <li>Od&nbsp;7 polí (3&nbsp;kWp) dosáhnete na&nbsp;zvýhodněné financování NZÚ</li>
+      </ul>
+    </div>
+    <div class="feat__visual" aria-hidden="true">
+      <svg viewBox="0 0 520 340">
+        <rect width="520" height="340" fill="#e9eef2"/>
+        <!-- baterie + dům schéma -->
+        <g stroke="#171a20" stroke-width="2.5" fill="none" stroke-linecap="round">
+          <rect x="70" y="120" width="90" height="150" rx="8" fill="#ffffff"/>
+          <line x1="88" y1="158" x2="142" y2="158"/><line x1="88" y1="196" x2="142" y2="196"/><line x1="88" y1="234" x2="142" y2="234"/>
+          <rect x="230" y="90" width="220" height="180" rx="8" fill="#ffffff"/>
+          <polyline points="230,120 340,60 450,120"/>
+          <rect x="270" y="170" width="40" height="60"/>
+          <rect x="350" y="170" width="60" height="42"/>
+          <path d="M160 195 H 230" stroke="#3e6ae1" stroke-width="4"/>
+        </g>
+        <g font-family="inherit" font-size="13" fill="#5c5e62">
+          <text x="78" y="300">Baterie LFP</text>
+          <text x="300" y="300">Vaše spotřeba</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec--mist" id="srovnani">
+  <div class="sec__inner rv">
+    <div class="sec__head">
+      <p class="eyebrow">Srovnání</p>
+      <h2>Nový plot stejně potřebujete</h2>
+      <p>Rozhodujete-li se pro prémiové oplocení, rozdíl v&nbsp;ceně není celá investice — jen doplatek za&nbsp;to, že plot začne vydělávat.</p>
+    </div>
+    <div class="cmp-wrap">
+      <table class="cmp">
+        <thead>
+          <tr><th>27 běžných metrů</th><th>Designový hliníkový plot</th><th>Solární plot</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Cena na klíč</td><td class="num">~135 000 Kč</td><td class="num">~530 000 Kč vč. instalace FVE</td></tr>
+          <tr><td>Roční výroba elektřiny</td><td class="num">—</td><td class="num">~4 200 kWh</td></tr>
+          <tr><td>Roční úspora</td><td class="num">0 Kč</td><td class="num">~23 000 Kč</td></tr>
+          <tr><td>Elektřina za 25 let provozu</td><td class="num">0 Kč</td><td class="num">~580 000 Kč</td></tr>
+          <tr><td>Údržba</td><td>natírání, opravy</td><td>žádná</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="konfigurator">
+  <div class="sec__inner">
+    <div class="sec__head rv">
+      <p class="eyebrow">Konfigurátor</p>
+      <h2>Sestavte si svůj plot</h2>
+      <p>Posuňte délku, zvolte orientaci a&nbsp;barvu. Cena i&nbsp;výnosy se přepočítají okamžitě.</p>
+    </div>
+    <div class="cfg rv">
+      <div>
+        <div class="cfg__preview">
+          <svg viewBox="0 0 640 300" aria-label="Náhled plotu">
+            <rect width="640" height="300" fill="none"/>
+            <g id="cfgFence" transform="translate(40,40)"></g>
+          </svg>
+        </div>
+        <div class="cfg__controls">
+          <div class="ctl">
+            <label for="len">Délka plotu <output id="lenOut">27,0 m · 15 polí</output></label>
+            <input type="range" id="len" min="6" max="60" step="1" value="27">
+          </div>
+          <div class="ctl">
+            <span class="lbl" id="oriLbl">Orientace produktivní strany</span>
+            <div class="seg" role="group" aria-labelledby="oriLbl">
+              <button type="button" data-yield="650" aria-pressed="true">Jih</button>
+              <button type="button" data-yield="580" aria-pressed="false">Východ / Západ</button>
+              <button type="button" data-yield="615" aria-pressed="false">Kombinace</button>
+            </div>
+          </div>
+          <div class="ctl">
+            <span class="lbl" id="colLbl">Barva desek</span>
+            <div class="colorpick" role="group" aria-labelledby="colLbl">
+              <button type="button" style="background:#5a4032" data-c="#5a4032" aria-pressed="true" aria-label="Ořech"></button>
+              <button type="button" style="background:#a97c50" data-c="#a97c50" aria-pressed="false" aria-label="Teak"></button>
+              <button type="button" style="background:#9a938a" data-c="#9a938a" aria-pressed="false" aria-label="Antik"></button>
+            </div>
+          </div>
+          <div class="ctl toggle">
+            <div class="t-copy">
+              <b>Bateriové úložiště</b>
+              <span id="batNote">kapacita se dimenzuje podle výkonu plotu</span>
+            </div>
+            <span class="switch"><input type="checkbox" id="bat" aria-label="Přidat bateriové úložiště"><i></i></span>
+          </div>
+        </div>
+      </div>
+      <aside class="sum" aria-live="polite">
+        <h3>Vaše sestava</h3>
+        <div class="price" id="price">—</div>
+        <div class="vat">orientační cena vč. 21 % DPH a montáže</div>
+        <dl>
+          <div><dt>Instalovaný výkon</dt><dd id="kwp">—</dd></div>
+          <div><dt>Roční výroba</dt><dd id="prod">—</dd></div>
+          <div><dt>Roční úspora</dt><dd id="save">—</dd></div>
+          <div><dt>Elektřina za 25 let</dt><dd id="life">—</dd></div>
+          <div><dt>Návratnost doplatku*</dt><dd id="pay">—</dd></div>
+        </dl>
+        <div class="nzu" id="nzu">Pro podmínky NZÚ přidejte baterii a zvolte alespoň 7 polí.</div>
+        <a class="btn btn--blue" href="#kontakt">Rezervovat obhlídku</a>
+        <p class="note">* Doplatek = rozdíl oproti běžnému designovému plotu (~5 000 Kč/bm), který byste pořizovali tak jako tak. Výpočet: elektřina 5,50 Kč/kWh, výroba dle orientace. Ceny jsou orientační do potvrzení obhlídkou.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec--dark" id="specifikace">
+  <div class="sec__inner">
+    <div class="sec__head rv">
+      <p class="eyebrow">Specifikace</p>
+      <h2>Technika pod povrchem</h2>
+    </div>
+    <dl class="specs rv">
+      <div class="spec"><dt>Fotovoltaický panel</dt><dd>PhonoSolar Draco Hedge 145 W, N-TOPCon, celočerný, 1760 × 400 × 20 mm, 8,75 kg</dd></div>
+      <div class="spec"><dt>Jedno pole</dt><dd>1,8 × 1,8 m, 3 panely = 435 Wp, prolamovaný dekorační pás, WPC sokl</dd></div>
+      <div class="spec"><dt>Konstrukce</dt><dd>Hliníkové sloupky à 1,8 m, betonové patky 250 × 250 × 600 mm</dd></div>
+      <div class="spec"><dt>Desky</dt><dd>Dřevoplast (WPC) — recyklovaný polymer + dřevní vlákno; ořech / teak / antik</dd></div>
+      <div class="spec"><dt>Střídač a baterie</dt><dd>Hybridní měnič dle EN 50549-1, monitoring; baterie LFP, modulární kapacita</dd></div>
+      <div class="spec"><dt>Odolnost</dt><dd>−40 až +85 °C, kroupy do 25 mm, zatížení 2400 Pa, IP68 junction box</dd></div>
+      <div class="spec"><dt>Certifikace</dt><dd>IEC 61215, IEC 61730, CE; Tier 1 výrobce (Bloomberg NEF)</dd></div>
+      <div class="spec"><dt>Záruka</dt><dd>10 let na panel, 25+ let očekávaná životnost; záruky sestavy dle smlouvy</dd></div>
+      <div class="spec"><dt>Instalace</dt><dd>Na klíč: základy, montáž, elektro, revize, připojení k distribuční soustavě</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section class="sec" id="faq">
+  <div class="sec__inner">
+    <div class="sec__head rv">
+      <p class="eyebrow">Časté dotazy</p>
+      <h2>Na co se ptáte</h2>
+    </div>
+    <div class="faq rv">
+      <details>
+        <summary>Dosáhnu s plotem na dotaci NZÚ?</summary>
+        <p>Panely splňují požadovanou účinnost s rezervou (21 % vs. požadovaných 18 %). Podmínkou programu je baterie s kapacitou alespoň rovnou výkonu a minimálně 3 kWp (cca 7 polí). Způsobilost plotové konstrukce aktuálně ověřujeme se SFŽP — do potvrzení ji negarantujeme.</p>
+      </details>
+      <details>
+        <summary>Potřebuji stavební povolení?</summary>
+        <p>Plot do 2 m výšky bývá ve volném režimu, ale protože jde zároveň o výrobnu elektřiny na betonových základech, doporučujeme ohlášení. Kompletní administrativu — včetně připojení k distribuční soustavě — vyřídíme za vás.</p>
+      </details>
+      <details>
+        <summary>Co severní strana pozemku?</summary>
+        <p>Severní strana vyrábí minimálně — proto do ní panely nedáváme. Na sever nabízíme stejný plot v čistě WPC provedení bez panelů, vzhledově identický a levnější. Konfigurátor počítá jen s produktivními stranami.</p>
+      </details>
+      <details>
+        <summary>Co sníh, kroupy a míč od sousedů?</summary>
+        <p>Panely mají tvrzené sklo certifikované na kroupy do 25 mm a mechanické zatížení 2400 Pa. Svislá plocha sníh nedrží — v zimě naopak těží z odrazu světla od sněhu. Každý panel je samostatně vyměnitelný.</p>
+      </details>
+      <details>
+        <summary>Kdo plot instaluje?</summary>
+        <p>Naše montážní týmy, které staví fotovoltaické elektrárny — plot dodáváme na klíč včetně elektroinstalace, revize a připojení. Typická montáž rodinného plotu zabere 2–4 dny.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer id="kontakt">
+  <div class="sec__inner">
+    <p class="brandline">Solární plot</p>
+    <p>Interní náhled webu — demo pro schválení. Uvedené ceny jsou orientační a nepředstavují veřejnou nabídku. Výroba a úspory závisí na orientaci, stínění a lokalitě. Rezervace obhlídky: <a href="mailto:zurab.kereselidze5@gmail.com">zurab.kereselidze5@gmail.com</a></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  /* ===== ceník (prodejní ceny vč. logiky z Excel ceníku, bez DPH) ===== */
+  var POLE = 10220;          // pole + DC + recyklace
+  var SLOUPEK = 2500;        // sloupek + patka + kotvení + výkop + osazení
+  var FIXED = 245150;        // systém + dokumentace + paušál + PDS + koncové lišty
+  var BAT_KWH = 6000;
+  var VAT = 1.21;
+  var EL = 5.5;              // Kč/kWh
+  var PLOT_BM = 5000;        // srovnávací designový plot Kč/bm
+
+  var fmtKc = function(x){ return Math.round(x).toLocaleString("cs-CZ") + " Kč"; };
+  var fmt1 = function(x){ return x.toLocaleString("cs-CZ",{minimumFractionDigits:1,maximumFractionDigits:1}); };
+
+  /* ===== kreslení plotu (SVG) ===== */
+  function drawFence(gid, spans, opts){
+    var g = document.getElementById(gid);
+    if(!g) return;
+    opts = opts || {};
+    var wpc = opts.wpc || "#5a4032";
+    var s = opts.scale || 1;
+    var W = 150*s, H = 220*s, POST = 10*s, GAP = 4*s;
+    var html = "";
+    for(var i=0;i<=spans;i++){
+      var x = i*(W+POST);
+      html += '<rect x="'+x+'" y="0" width="'+POST+'" height="'+(H+14*s)+'" rx="'+2*s+'" fill="#1b1f26"/>';
+      html += '<rect x="'+(x-2*s)+'" y="-6" width="'+(POST+4*s)+'" height="'+6*s+'" rx="'+2*s+'" fill="#2a2f37"/>';
+    }
+    for(var j=0;j<spans;j++){
+      var fx = j*(W+POST)+POST;
+      /* dekorační pás */
+      html += '<rect x="'+fx+'" y="0" width="'+W+'" height="'+26*s+'" fill="#14181f"/>';
+      for(var d=0; d<6; d++){
+        html += '<circle cx="'+(fx+(d+0.5)*(W/6))+'" cy="'+13*s+'" r="'+3.2*s+'" fill="#e8e4da" opacity=".9"/>';
+      }
+      /* 3 panely */
+      for(var p=0;p<3;p++){
+        var py = 26*s + GAP + p*(52*s+GAP);
+        html += '<rect x="'+fx+'" y="'+py+'" width="'+W+'" height="'+52*s+'" fill="url(#panelG)"/>';
+        for(var c=1;c<8;c++){
+          html += '<line x1="'+(fx+c*(W/8))+'" y1="'+py+'" x2="'+(fx+c*(W/8))+'" y2="'+(py+52*s)+'" stroke="#2c3340" stroke-width="'+0.8*s+'"/>';
+        }
+        html += '<rect x="'+fx+'" y="'+py+'" width="'+W+'" height="'+52*s+'" fill="url(#glass)"/>';
+      }
+      /* WPC sokl */
+      var wy = 26*s + GAP + 3*(52*s+GAP);
+      html += '<rect class="wpcBoard" x="'+fx+'" y="'+wy+'" width="'+W+'" height="'+34*s+'" fill="'+wpc+'"/>';
+      html += '<line x1="'+fx+'" y1="'+(wy+17*s)+'" x2="'+(fx+W)+'" y2="'+(wy+17*s)+'" stroke="rgba(0,0,0,.25)" stroke-width="'+1.2*s+'"/>';
+    }
+    g.innerHTML = html;
+  }
+
+  /* hero + feature ploty — potřebují defs z hero SVG; feature SVG mají vlastní kontext,
+     proto tam gradient nahradíme plnou barvou */
+  drawFence("heroFence", 8, {scale:1.15});
+  drawFence("featFence1", 3, {scale:0.85});
+  drawFence("featFence2", 3, {scale:0.85, wpc:"#a97c50"});
+  drawFence("cfgFence", 4, {scale:0.9});
+  /* feature SVG nemají #panelG/#glass — doplníme lokální defs */
+  ["featFence1","featFence2","cfgFence"].forEach(function(id){
+    var g = document.getElementById(id);
+    if(!g) return;
+    var svg = g.ownerSVGElement;
+    if(svg && !svg.querySelector("defs")){
+      var src = document.querySelector(".hero__scene defs");
+      if(src) svg.insertBefore(src.cloneNode(true), svg.firstChild);
+    }
+  });
+
+  /* ===== konfigurátor ===== */
+  var lenEl = document.getElementById("len");
+  var state = { len:27, yield:650, wpc:"#5a4032", bat:false };
+
+  function calc(){
+    var spans = Math.max(3, Math.round(state.len/1.8));
+    var realLen = spans*1.8;
+    var kwp = spans*0.435;
+    var batKwh = state.bat ? Math.ceil(kwp) : 0;
+    var priceNoVatNoBat = FIXED + spans*POLE + (spans+1)*SLOUPEK;
+    var priceNoVat = priceNoVatNoBat + batKwh*BAT_KWH;
+    var price = priceNoVat*VAT;
+    var prod = kwp*state.yield;
+    var save = prod*EL;
+    var extra = priceNoVatNoBat - realLen*PLOT_BM;
+    var pay = save>0 ? extra/save : 0;
+
+    document.getElementById("lenOut").textContent = fmt1(realLen)+" m · "+spans+" polí";
+    document.getElementById("price").textContent = fmtKc(price);
+    document.getElementById("kwp").textContent = kwp.toLocaleString("cs-CZ",{maximumFractionDigits:2})+" kWp";
+    document.getElementById("prod").textContent = Math.round(prod).toLocaleString("cs-CZ")+" kWh";
+    document.getElementById("save").textContent = fmtKc(save)+"/rok";
+    document.getElementById("life").textContent = fmtKc(save*25);
+    document.getElementById("pay").textContent = fmt1(pay)+" let";
+    document.getElementById("batNote").textContent = state.bat
+      ? ("kapacita "+batKwh+" kWh (+ "+fmtKc(batKwh*BAT_KWH*VAT)+")")
+      : "kapacita se dimenzuje podle výkonu plotu";
+
+    var nzu = document.getElementById("nzu");
+    if(state.bat && kwp>=3){
+      nzu.textContent = "✓ Sestava splňuje technické podmínky NZÚ (baterie "+batKwh+" kWh ≥ "+kwp.toLocaleString("cs-CZ",{maximumFractionDigits:2})+" kWp, min. 3 kWp).";
+      nzu.className = "nzu ok";
+    } else {
+      nzu.textContent = "Pro podmínky NZÚ přidejte baterii" + (kwp<3 ? " a zvolte alespoň 7 polí (3 kWp)." : ".");
+      nzu.className = "nzu";
+    }
+    drawFence("cfgFence", Math.min(4, spans), {scale:0.9, wpc:state.wpc});
+  }
+
+  lenEl.addEventListener("input", function(){ state.len = +this.value; calc(); });
+
+  document.querySelectorAll(".seg button").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll(".seg button").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+      this.setAttribute("aria-pressed","true");
+      state.yield = +this.dataset.yield;
+      calc();
+    });
+  });
+  document.querySelectorAll(".colorpick button").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll(".colorpick button").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+      this.setAttribute("aria-pressed","true");
+      state.wpc = this.dataset.c;
+      calc();
+    });
+  });
+  document.getElementById("bat").addEventListener("change", function(){ state.bat = this.checked; calc(); });
+  calc();
+
+  /* ===== nav + reveal ===== */
+  var nav = document.getElementById("nav");
+  window.addEventListener("scroll", function(){
+    nav.classList.toggle("solid", window.scrollY > 40);
+  }, {passive:true});
+
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
+  }, {threshold:.15});
+  document.querySelectorAll(".rv").forEach(function(el){ io.observe(el); });
+})();
+</script>
+
+</body>
+</html>
