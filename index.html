@@ -18,6 +18,8 @@
     --walnut:#5a4032;
     --teak:#a97c50;
     --antik:#9a938a;
+    --panel-top:#232935;
+    --panel-bot:#0c1017;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -25,53 +27,219 @@
   body{
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
     color:var(--ink);background:var(--paper);
-    -webkit-font-smoothing:antialiased;line-height:1.5;
+    -webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;
   }
-  /* ---------- NAV ---------- */
+  /* ================= NAV ================= */
   .nav{
-    position:fixed;inset:0 0 auto 0;z-index:50;
+    position:fixed;inset:0 0 auto 0;z-index:60;
     display:flex;align-items:center;justify-content:space-between;
-    padding:0 32px;height:56px;
-    background:rgba(255,255,255,0);transition:background .3s,box-shadow .3s;
+    padding:0 32px;height:56px;color:var(--ink);
+    background:rgba(255,255,255,0);transition:background .3s,box-shadow .3s,color .3s;
   }
-  .nav.solid{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(23,26,32,.08)}
-  .nav__brand{font-size:15px;font-weight:700;letter-spacing:.34em;text-decoration:none;color:var(--ink);text-transform:uppercase}
+  .nav.solid{background:rgba(255,255,255,.9);backdrop-filter:blur(14px);box-shadow:0 1px 0 rgba(23,26,32,.08);color:var(--ink)}
+  .hero.night ~ * .nav{}
+  body.nightmode .nav:not(.solid){color:#eef1f5}
+  .nav__brand{font-size:15px;font-weight:700;letter-spacing:.34em;text-decoration:none;color:inherit;text-transform:uppercase}
   .nav__links{display:flex;gap:4px;list-style:none}
   .nav__links a{
-    text-decoration:none;color:var(--ink);font-size:13.5px;font-weight:500;
+    text-decoration:none;color:inherit;font-size:13.5px;font-weight:500;
     padding:7px 14px;border-radius:4px;transition:background .2s;
   }
-  .nav__links a:hover,.nav__links a:focus-visible{background:rgba(23,26,32,.06)}
+  .nav__links a:hover,.nav__links a:focus-visible{background:rgba(128,138,150,.18)}
   @media(max-width:760px){.nav__links{display:none}}
-  /* ---------- BUTTONS ---------- */
+  /* ================= BUTTONS ================= */
   .btn{
     display:inline-block;text-align:center;text-decoration:none;cursor:pointer;
     font:inherit;font-size:14px;font-weight:500;
-    min-width:240px;padding:9px 24px;border-radius:4px;border:0;
-    transition:opacity .2s,transform .2s;
+    min-width:240px;padding:10px 24px;border-radius:4px;border:0;
+    transition:opacity .2s,transform .15s;
   }
   .btn:hover{opacity:.86}
+  .btn:active{transform:scale(.985)}
   .btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-  .btn--dark{background:rgba(23,26,32,.85);color:#fff}
-  .btn--light{background:rgba(255,255,255,.72);color:#2f3238}
+  .btn--dark{background:rgba(23,26,32,.85);color:#fff;backdrop-filter:blur(6px)}
+  .btn--light{background:rgba(255,255,255,.75);color:#2f3238;backdrop-filter:blur(6px)}
   .btn--blue{background:var(--blue);color:#fff}
-  @media(max-width:560px){.btn{min-width:88vw}}
-  /* ---------- HERO ---------- */
+  @media(max-width:560px){.btn{min-width:84vw}}
+  /* ================= HERO / 3D SCÉNA ================= */
   .hero{
-    position:relative;height:100vh;min-height:640px;overflow:hidden;
+    position:relative;height:100vh;min-height:660px;overflow:hidden;
     display:flex;flex-direction:column;align-items:center;
+    transition:background 1.2s ease;
+    background:linear-gradient(180deg,#c9d9e8 0%,#e8e2d2 52%,#f2dfc0 72%,#e3cfae 100%);
   }
-  .hero__scene{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1}
-  .hero__copy{margin-top:15vh;text-align:center;padding:0 20px}
-  .hero__copy h1{font-size:clamp(32px,5vw,44px);font-weight:600;letter-spacing:-.01em}
-  .hero__copy p{font-size:15px;margin-top:6px;color:#2f3238}
-  .hero__copy p a{color:inherit}
+  .hero.night{
+    background:linear-gradient(180deg,#060a14 0%,#0b1322 55%,#16233a 85%,#1d2c45 100%);
+  }
+  .orb{
+    position:absolute;width:120px;height:120px;border-radius:50%;
+    right:16%;top:52%;z-index:1;
+    background:radial-gradient(circle at 42% 40%,#fff6dd,#ffd98a 58%,rgba(255,217,138,0) 72%);
+    filter:blur(1px);
+    box-shadow:0 0 140px 70px rgba(255,214,140,.5);
+    transition:all 1.2s ease;
+  }
+  .hero.night .orb{
+    right:78%;top:21%;width:62px;height:62px;
+    background:radial-gradient(circle at 40% 38%,#ffffff,#d9e2f2 60%,rgba(217,226,242,0) 75%);
+    box-shadow:0 0 90px 30px rgba(214,228,255,.28);
+  }
+  .stars{position:absolute;inset:0;z-index:0;opacity:0;transition:opacity 1.4s ease;pointer-events:none}
+  .hero.night .stars{opacity:1}
+  .stars i{
+    position:absolute;width:2px;height:2px;border-radius:50%;background:#dfe8ff;
+    box-shadow:
+      12vw 8vh 0 #cfe0ff, 24vw 16vh 0 #ffffff, 33vw 6vh 0 #bcd2ff,
+      44vw 12vh 0 #e8f0ff, 55vw 5vh 0 #ffffff, 63vw 18vh 0 #cfe0ff,
+      72vw 9vh 0 #ffffff, 82vw 15vh 0 #bcd2ff, 90vw 7vh 0 #e8f0ff,
+      18vw 24vh 0 #ffffff, 50vw 22vh 0 #cfe0ff, 86vw 26vh 0 #ffffff,
+      6vw 15vh 0 #e8f0ff, 68vw 27vh 0 #bcd2ff, 38vw 28vh 0 #ffffff;
+  }
+  .ground{
+    position:absolute;left:-10%;right:-10%;bottom:0;height:34%;z-index:1;
+    background:linear-gradient(180deg,#b9c2a8 0%,#a6ad97 40%,#8f9683 100%);
+    transition:background 1.2s ease;
+  }
+  .hero.night .ground{background:linear-gradient(180deg,#131b2a 0%,#0e1521 60%,#0a0f19 100%)}
+  .house{
+    position:absolute;z-index:2;right:8%;bottom:30%;width:340px;height:230px;
+    transition:filter 1.2s ease;will-change:transform;
+  }
+  .house .body{position:absolute;left:20px;right:0;top:70px;bottom:0;background:#ece7dc;transition:background 1.2s}
+  .house .roof{
+    position:absolute;left:0;top:0;width:0;height:0;
+    border-left:180px solid transparent;border-right:180px solid transparent;
+    border-bottom:74px solid #3a3e45;
+  }
+  .house .pv{position:absolute;left:52px;top:16px;width:150px;height:44px;background:linear-gradient(180deg,#1d2430,#0e131c);transform:skewX(-38deg);opacity:.92}
+  .house .win{position:absolute;width:52px;height:66px;top:110px;background:#b9c4cc;transition:background .9s,box-shadow .9s}
+  .house .w1{left:60px}.house .w2{left:150px}
+  .house .door{position:absolute;width:48px;height:118px;right:36px;bottom:0;background:#7a8087}
+  .hero.night .house .body{background:#232833}
+  .hero.night .house .win{background:#ffd98a;box-shadow:0 0 26px 6px rgba(255,217,138,.45)}
+  /* ---------- 3D stage ---------- */
+  .stage{
+    position:absolute;z-index:3;left:50%;bottom:11%;
+    width:1200px;height:420px;margin-left:-600px;
+    perspective:1400px;perspective-origin:50% 30%;
+    cursor:grab;touch-action:pan-y;
+  }
+  .stage:active{cursor:grabbing}
+  .f3d{
+    position:absolute;left:50%;bottom:60px;width:0;height:0;
+    transform-style:preserve-3d;
+    transform:rotateX(-5deg) rotateY(-16deg) scale(.86);
+    will-change:transform;
+  }
+  .f3d *{transform-style:preserve-3d}
+  .fshadow{
+    position:absolute;left:50%;bottom:34px;width:980px;height:70px;margin-left:-490px;
+    background:radial-gradient(ellipse at center,rgba(10,14,20,.38),rgba(10,14,20,0) 70%);
+    filter:blur(6px);transition:opacity 1.2s;
+  }
+  .hero.night .fshadow{opacity:.65}
+  /* post = 3D hranol */
+  .post{position:absolute;bottom:0}
+  .post i{position:absolute;bottom:0;width:16px;height:330px;background:linear-gradient(180deg,#262b33,#15181e)}
+  .post i.f{transform:translateZ(8px)}
+  .post i.b{transform:translateZ(-8px);background:#101318}
+  .post i.l{transform:rotateY(90deg) translateZ(-8px);background:#1b1f26}
+  .post i.r{transform:rotateY(90deg) translateZ(8px);background:#2a2f37}
+  .post .cap{
+    position:absolute;bottom:328px;left:-3px;width:22px;height:8px;
+    background:linear-gradient(180deg,#3a404a,#22262d);transform:translateZ(0);
+  }
+  .post .lamp{
+    position:absolute;bottom:336px;left:3px;width:10px;height:4px;border-radius:2px;
+    background:#2a2f37;transition:background .9s,box-shadow .9s;
+  }
+  .hero.night .lamp,.night .lamp{
+    background:#ffd98a;box-shadow:0 0 18px 6px rgba(255,217,138,.55),0 -6px 30px 10px rgba(255,217,138,.25);
+  }
+  /* span = výplň pole */
+  .span3{position:absolute;bottom:0;height:330px}
+  .face{position:absolute;left:0;right:0}
+  .deco{
+    top:0;height:38px;background:#14181f;
+    background-image:radial-gradient(circle,#e8e4da 2.6px,transparent 3px);
+    background-size:34px 100%;background-position:center;
+    border-bottom:2px solid #2a2f37;transition:box-shadow .9s;
+  }
+  .hero.night .deco,.night .deco{
+    background-image:radial-gradient(circle,#ffe6ad 2.6px,transparent 3px);
+    box-shadow:0 0 22px rgba(255,220,150,.28);
+  }
+  .cell{
+    height:72px;border:1px solid #262c37;
+    background:
+      repeating-linear-gradient(90deg,rgba(70,84,110,.35) 0 1px,transparent 1px 27px),
+      linear-gradient(180deg,var(--panel-top),var(--panel-bot));
+    position:absolute;overflow:hidden;
+  }
+  .cell::after{
+    content:"";position:absolute;top:-60%;bottom:-60%;width:34%;left:-50%;
+    background:linear-gradient(100deg,transparent,rgba(190,215,255,.16),transparent);
+    transform:rotate(8deg);
+    animation:sheen 7s ease-in-out infinite;
+  }
+  .span3 .c1{top:40px}.span3 .c2{top:114px}.span3 .c3{top:188px}
+  .wpc{
+    top:262px;height:52px;background:var(--wpc,#5a4032);
+    background-image:
+      repeating-linear-gradient(180deg,rgba(0,0,0,.16) 0 1px,transparent 1px 13px),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 2px,transparent 2px 60px);
+    border-top:2px solid rgba(0,0,0,.3);
+  }
+  .span3 .back{
+    position:absolute;inset:0;background:#0a0d12;transform:translateZ(-6px);
+  }
+  @keyframes sheen{
+    0%,55%{left:-50%}
+    75%{left:120%}
+    100%{left:120%}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .cell::after{animation:none}
+  }
+  @media(max-width:900px){
+    .stage{transform:scale(.62);transform-origin:50% 100%;bottom:4%}
+    .house{right:2%;transform:scale(.7);transform-origin:bottom right}
+  }
+  /* hero text */
+  .hero__copy{margin-top:11vh;text-align:center;padding:0 20px;position:relative;z-index:10;transition:color .9s}
+  .hero__copy h1{font-size:clamp(34px,5vw,46px);font-weight:600;letter-spacing:-.01em}
+  .hero__copy p{font-size:15.5px;margin-top:6px;color:#2f3238;transition:color .9s}
+  .hero.night .hero__copy{color:#eef1f5}
+  .hero.night .hero__copy p{color:#aab6c6}
   .hero__cta{
-    position:absolute;bottom:9vh;left:0;right:0;
+    position:absolute;bottom:5vh;left:0;right:0;z-index:10;
     display:flex;gap:20px;justify-content:center;flex-wrap:wrap;padding:0 20px;
   }
-  /* ---------- SECTIONS ---------- */
-  .sec{padding:96px 24px}
+  /* mode toggle */
+  .mode{
+    position:absolute;z-index:11;top:76px;right:32px;
+    display:flex;border-radius:999px;overflow:hidden;
+    background:rgba(255,255,255,.6);backdrop-filter:blur(8px);
+    border:1px solid rgba(23,26,32,.12);
+  }
+  .hero.night .mode{background:rgba(15,22,36,.6);border-color:rgba(255,255,255,.14)}
+  .mode button{
+    font:inherit;font-size:12.5px;font-weight:600;letter-spacing:.06em;
+    padding:7px 16px;border:0;background:transparent;cursor:pointer;color:var(--grey);
+  }
+  .hero.night .mode button{color:#8fa0b8}
+  .mode button[aria-pressed=true]{background:var(--ink);color:#fff}
+  .hero.night .mode button[aria-pressed=true]{background:#eef1f5;color:var(--ink)}
+  .mode button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+  .hint{
+    position:absolute;z-index:10;bottom:13vh;left:50%;transform:translateX(-50%);
+    font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(23,26,32,.55);
+    transition:opacity .6s,color .9s;pointer-events:none;
+  }
+  .hero.night .hint{color:rgba(238,241,245,.5)}
+  .hint.gone{opacity:0}
+  /* ================= SEKCE ================= */
+  .sec{padding:96px 24px;position:relative}
   .sec--mist{background:var(--mist)}
   .sec--dark{background:var(--ink);color:#fff}
   .sec__inner{max-width:1080px;margin:0 auto}
@@ -81,13 +249,13 @@
   .sec--dark .sec__head p{color:#a6a8ab}
   .eyebrow{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:12px}
   .sec--dark .eyebrow{color:#8e9093}
-  /* ---------- STATS ---------- */
+  /* stats */
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;max-width:960px;margin:0 auto}
   @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
   .stat{text-align:center}
-  .stat b{display:block;font-size:clamp(26px,3.2vw,36px);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .stat b{display:block;font-size:clamp(26px,3.2vw,38px);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
   .stat span{display:block;margin-top:4px;font-size:13px;color:var(--grey)}
-  /* ---------- FEATURES ---------- */
+  /* features */
   .feat{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;max-width:1080px;margin:0 auto}
   @media(max-width:860px){.feat{grid-template-columns:1fr;gap:32px}}
   .feat h3{font-size:clamp(24px,3vw,30px);font-weight:600;letter-spacing:-.01em;text-wrap:balance}
@@ -96,13 +264,38 @@
   .feat ul{margin-top:18px;list-style:none;display:grid;gap:10px}
   .feat li{font-size:14px;padding-left:18px;position:relative}
   .feat li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--blue)}
-  .feat__visual{border-radius:8px;overflow:hidden;background:var(--mist)}
-  .sec--dark .feat__visual{background:#22262d}
-  .feat__visual svg{display:block;width:100%;height:auto}
+  .ministage{
+    border-radius:10px;overflow:hidden;position:relative;height:340px;
+    perspective:1500px;perspective-origin:50% 42%;cursor:grab;touch-action:pan-y;
+  }
+  .ministage:active{cursor:grabbing}
+  .ministage.day{background:linear-gradient(180deg,#dfe8ef 0%,#efe8d8 62%,#c9c6b2 62.5%,#b1af9d 100%)}
+  .ministage.night{background:linear-gradient(180deg,#080d18 0%,#101a2c 62%,#0d1420 62.5%,#0a0f19 100%)}
+  .ministage .f3d{bottom:36px;transform:rotateX(-4deg) rotateY(-14deg) scale(.5)}
   .swatches{display:flex;gap:14px;margin-top:22px}
-  .swatch{width:52px;text-align:center;font-size:11px;color:inherit}
+  .swatch{width:56px;text-align:center;font-size:11px;color:inherit}
   .swatch i{display:block;height:52px;border-radius:50%;margin-bottom:6px;border:2px solid rgba(255,255,255,.25)}
-  /* ---------- COMPARE ---------- */
+  /* energy flow */
+  .flow{
+    border-radius:10px;background:#f0f3f6;position:relative;height:340px;overflow:hidden;
+  }
+  .flow svg{position:absolute;inset:0;width:100%;height:100%}
+  .flow .dot{
+    position:absolute;width:9px;height:9px;border-radius:50%;
+    background:var(--blue);box-shadow:0 0 12px 2px rgba(62,106,225,.55);
+    offset-path:path("M95 150 C 180 150 200 220 300 220 C 380 220 400 150 480 150");
+    animation:flowmove 3.2s linear infinite;
+  }
+  .flow .dot:nth-child(2){animation-delay:1.05s}
+  .flow .dot:nth-child(3){animation-delay:2.1s}
+  @keyframes flowmove{
+    0%{offset-distance:0%;opacity:0}
+    8%{opacity:1}
+    92%{opacity:1}
+    100%{offset-distance:100%;opacity:0}
+  }
+  @media (prefers-reduced-motion:reduce){.flow .dot{animation:none;opacity:0}}
+  /* compare */
   .cmp-wrap{overflow-x:auto}
   .cmp{width:100%;max-width:860px;margin:0 auto;border-collapse:collapse;font-size:14.5px}
   .cmp th,.cmp td{padding:16px 18px;text-align:left;border-bottom:1px solid var(--line)}
@@ -110,11 +303,9 @@
   .cmp td:nth-child(3){font-weight:600}
   .cmp tbody tr:last-child td{border-bottom:0}
   .cmp .num{font-variant-numeric:tabular-nums}
-  /* ---------- CONFIGURATOR ---------- */
+  /* configurator */
   .cfg{display:grid;grid-template-columns:1.35fr 1fr;gap:56px;max-width:1080px;margin:0 auto;align-items:start}
   @media(max-width:900px){.cfg{grid-template-columns:1fr}}
-  .cfg__preview{border-radius:8px;overflow:hidden;background:linear-gradient(#e9eef2,#f6f2ea)}
-  .cfg__preview svg{display:block;width:100%;height:auto}
   .cfg__controls{margin-top:32px;display:grid;gap:32px}
   .ctl label,.ctl .lbl{display:flex;justify-content:space-between;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--grey);margin-bottom:12px}
   .ctl output{color:var(--ink);font-variant-numeric:tabular-nums}
@@ -125,10 +316,7 @@
   .seg button[aria-pressed=true]{background:var(--ink);color:#fff}
   .seg button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
   .colorpick{display:flex;gap:16px}
-  .colorpick button{
-    width:46px;height:46px;border-radius:50%;cursor:pointer;border:2px solid transparent;
-    box-shadow:inset 0 0 0 2px #fff;
-  }
+  .colorpick button{width:46px;height:46px;border-radius:50%;cursor:pointer;border:2px solid transparent;box-shadow:inset 0 0 0 2px #fff}
   .colorpick button[aria-pressed=true]{border-color:var(--ink)}
   .colorpick button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
   .toggle{display:flex;align-items:center;justify-content:space-between;gap:16px}
@@ -141,13 +329,9 @@
   .switch input:checked+i{background:var(--ink)}
   .switch input:checked+i::after{transform:translateX(20px)}
   .switch input:focus-visible+i{outline:2px solid var(--blue);outline-offset:2px}
-  /* summary card */
-  .sum{
-    position:sticky;top:76px;border:1px solid var(--line);border-radius:8px;padding:28px;
-    display:grid;gap:0;background:#fff;
-  }
+  .sum{position:sticky;top:76px;border:1px solid var(--line);border-radius:10px;padding:28px;background:#fff;box-shadow:0 18px 44px -28px rgba(23,26,32,.28)}
   .sum h3{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--grey)}
-  .sum .price{font-size:clamp(30px,3.4vw,38px);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-top:6px}
+  .sum .price{font-size:clamp(30px,3.4vw,38px);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-top:6px;transition:opacity .2s}
   .sum .vat{font-size:12.5px;color:var(--grey);margin-top:2px}
   .sum dl{margin-top:22px;border-top:1px solid var(--line)}
   .sum dl div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
@@ -157,31 +341,29 @@
   .sum .nzu.ok{background:#eaf3ec;color:#1e6b34}
   .sum .btn{margin-top:18px;min-width:0;width:100%}
   .sum .note{margin-top:12px;font-size:11.5px;color:var(--grey);line-height:1.45}
-  /* ---------- SPECS ---------- */
-  .specs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#33373e;border-radius:8px;overflow:hidden;max-width:1080px;margin:0 auto}
+  /* specs */
+  .specs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#33373e;border-radius:10px;overflow:hidden;max-width:1080px;margin:0 auto}
   @media(max-width:860px){.specs{grid-template-columns:1fr 1fr}}
   @media(max-width:560px){.specs{grid-template-columns:1fr}}
-  .spec{background:var(--ink);padding:24px}
+  .spec{background:var(--ink);padding:24px;transition:background .25s}
+  .spec:hover{background:#1e232b}
   .spec dt{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#8e9093}
   .spec dd{margin-top:8px;font-size:14.5px;line-height:1.55}
-  /* ---------- FAQ ---------- */
-  .faq{max-width:720px;margin:0 auto;display:grid;gap:0}
+  /* faq */
+  .faq{max-width:720px;margin:0 auto}
   .faq details{border-bottom:1px solid var(--line)}
-  .faq summary{
-    cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;
-    padding:20px 4px;font-size:15.5px;font-weight:600;
-  }
+  .faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;padding:20px 4px;font-size:15.5px;font-weight:600}
   .faq summary::-webkit-details-marker{display:none}
   .faq summary::after{content:"+";font-size:22px;font-weight:400;color:var(--grey);transition:transform .2s}
   .faq details[open] summary::after{transform:rotate(45deg)}
   .faq details p{padding:0 4px 22px;color:var(--grey);font-size:14.5px;max-width:62ch}
-  /* ---------- FOOTER ---------- */
+  /* footer */
   footer{padding:48px 24px 64px;background:var(--mist)}
   footer .sec__inner{text-align:center}
   footer p{font-size:12px;color:var(--grey);max-width:70ch;margin:0 auto}
   footer .brandline{font-size:13px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--ink);margin-bottom:14px}
   /* reveal */
-  .rv{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+  .rv{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
   .rv.in{opacity:1;transform:none}
   @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
 </style>
@@ -199,54 +381,31 @@
 </nav>
 
 <header class="hero" id="top">
-  <svg class="hero__scene" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    <defs>
-      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#dce6ee"/>
-        <stop offset=".55" stop-color="#eae7dd"/>
-        <stop offset=".8" stop-color="#f3e3c9"/>
-      </linearGradient>
-      <radialGradient id="sun" cx=".72" cy=".78" r=".5">
-        <stop offset="0" stop-color="#ffe9bd" stop-opacity=".9"/>
-        <stop offset="1" stop-color="#ffe9bd" stop-opacity="0"/>
-      </radialGradient>
-      <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#c8c4b4"/>
-        <stop offset="1" stop-color="#b3b0a2"/>
-      </linearGradient>
-      <linearGradient id="panelG" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#232935"/>
-        <stop offset=".5" stop-color="#141922"/>
-        <stop offset="1" stop-color="#0d1118"/>
-      </linearGradient>
-      <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#ffffff" stop-opacity=".14"/>
-        <stop offset=".4" stop-color="#ffffff" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-    <rect width="1440" height="760" fill="url(#sky)"/>
-    <rect width="1440" height="760" fill="url(#sun)"/>
-    <!-- dům v pozadí -->
-    <g opacity=".9">
-      <rect x="980" y="330" width="300" height="180" fill="#e8e4da"/>
-      <polygon points="965,330 1130,240 1295,330" fill="#3b3f46"/>
-      <rect x="1020" y="370" width="52" height="70" fill="#b9c4cc"/>
-      <rect x="1105" y="370" width="52" height="70" fill="#b9c4cc"/>
-      <rect x="1190" y="370" width="52" height="140" fill="#7a8087"/>
-      <!-- střešní FVE decentně -->
-      <polygon points="1010,318 1128,254 1180,282 1056,344" fill="#151a22" opacity=".85"/>
-    </g>
-    <!-- zem -->
-    <rect x="0" y="510" width="1440" height="250" fill="url(#ground)"/>
-    <!-- PLOT: 5 polí -->
-    <g id="heroFence" transform="translate(60,300)">
-      <!-- sloupky + pole se generují JS-em -->
-    </g>
-  </svg>
-  <div class="hero__copy rv in">
+  <div class="stars" aria-hidden="true"><i></i></div>
+  <div class="orb" aria-hidden="true"></div>
+  <div class="house" aria-hidden="true">
+    <div class="roof"></div><div class="pv"></div>
+    <div class="body"></div>
+    <div class="win w1"></div><div class="win w2"></div><div class="door"></div>
+  </div>
+  <div class="ground" aria-hidden="true"></div>
+
+  <div class="hero__copy">
     <h1>Solární plot</h1>
     <p>Prémiové oplocení, které vyrábí elektřinu</p>
   </div>
+
+  <div class="mode" role="group" aria-label="Denní doba">
+    <button type="button" id="mDay" aria-pressed="true">Den</button>
+    <button type="button" id="mNight" aria-pressed="false">Noc</button>
+  </div>
+
+  <div class="stage" id="heroStage" aria-label="Interaktivní 3D model plotu — tažením otočíte">
+    <div class="fshadow"></div>
+    <div class="f3d" id="heroF"></div>
+  </div>
+  <p class="hint" id="hint">⟷ táhněte pro otočení</p>
+
   <div class="hero__cta">
     <a class="btn btn--dark" href="#konfigurator">Sestavit vlastní</a>
     <a class="btn btn--light" href="#energie">Zjistit více</a>
@@ -254,11 +413,11 @@
 </header>
 
 <section class="sec">
-  <div class="stats rv">
-    <div class="stat"><b>435&nbsp;W</b><span>výkon jednoho pole</span></div>
-    <div class="stat"><b>21,3&nbsp;%</b><span>účinnost panelu N-TOPCon</span></div>
-    <div class="stat"><b>25+&nbsp;let</b><span>životnost bez údržby</span></div>
-    <div class="stat"><b>0&nbsp;m²</b><span>zabrané země navíc</span></div>
+  <div class="stats rv" id="stats">
+    <div class="stat"><b><span data-cnt="435">0</span>&nbsp;W</b><span>výkon jednoho pole</span></div>
+    <div class="stat"><b><span data-cnt="21.3" data-dec="1">0</span>&nbsp;%</b><span>účinnost panelu N-TOPCon</span></div>
+    <div class="stat"><b><span data-cnt="25">0</span>+&nbsp;let</b><span>životnost bez údržby</span></div>
+    <div class="stat"><b><span data-cnt="0">0</span>&nbsp;m²</b><span>zabrané země navíc</span></div>
   </div>
 </section>
 
@@ -274,27 +433,17 @@
         <li>N-TOPCon články — vyšší výnos při slabém světle</li>
       </ul>
     </div>
-    <div class="feat__visual" aria-hidden="true">
-      <svg viewBox="0 0 520 340">
-        <rect width="520" height="340" fill="#e9eef2"/>
-        <g id="featFence1" transform="translate(60,50)"></g>
-      </svg>
-    </div>
+    <div class="ministage day" data-fence="3" data-wpc="#5a4032" aria-label="3D model plotu — tažením otočíte"></div>
   </div>
 </section>
 
 <section class="sec sec--dark" id="design">
   <div class="feat rv">
-    <div class="feat__visual" aria-hidden="true">
-      <svg viewBox="0 0 520 340">
-        <rect width="520" height="340" fill="#22262d"/>
-        <g id="featFence2" transform="translate(60,50)"></g>
-      </svg>
-    </div>
+    <div class="ministage night" data-fence="3" data-wpc="#a97c50" aria-label="3D model plotu v noci — tažením otočíte"></div>
     <div>
       <p class="eyebrow">Design</p>
-      <h3>Vzhled dřeva. Bez&nbsp;údržby.</h3>
-      <p>Dřevoplastové desky (WPC) z&nbsp;recyklovaných polymerů a&nbsp;dřevních vláken vypadají jako dřevo, ale nikdy je nebudete brousit ani natírat. Hliníkové sloupky, prolamovaný dekorační pás a&nbsp;tři barevné varianty desek.</p>
+      <h3>Vzhled dřeva. Bez&nbsp;údržby. V&nbsp;noci světlo.</h3>
+      <p>Dřevoplastové desky (WPC) z&nbsp;recyklovaných polymerů a&nbsp;dřevních vláken vypadají jako dřevo, ale nikdy je nebudete brousit ani natírat. A&nbsp;po&nbsp;setmění se prolamovaný dekorační pás promění v&nbsp;linku zahradního osvětlení — napájenou elektřinou, kterou si plot přes den vyrobil.</p>
       <div class="swatches">
         <div class="swatch"><i style="background:#5a4032"></i>Ořech</div>
         <div class="swatch"><i style="background:#a97c50"></i>Teak</div>
@@ -316,24 +465,25 @@
         <li>Od&nbsp;7 polí (3&nbsp;kWp) dosáhnete na&nbsp;zvýhodněné financování NZÚ</li>
       </ul>
     </div>
-    <div class="feat__visual" aria-hidden="true">
-      <svg viewBox="0 0 520 340">
-        <rect width="520" height="340" fill="#e9eef2"/>
-        <!-- baterie + dům schéma -->
-        <g stroke="#171a20" stroke-width="2.5" fill="none" stroke-linecap="round">
-          <rect x="70" y="120" width="90" height="150" rx="8" fill="#ffffff"/>
-          <line x1="88" y1="158" x2="142" y2="158"/><line x1="88" y1="196" x2="142" y2="196"/><line x1="88" y1="234" x2="142" y2="234"/>
-          <rect x="230" y="90" width="220" height="180" rx="8" fill="#ffffff"/>
-          <polyline points="230,120 340,60 450,120"/>
-          <rect x="270" y="170" width="40" height="60"/>
-          <rect x="350" y="170" width="60" height="42"/>
-          <path d="M160 195 H 230" stroke="#3e6ae1" stroke-width="4"/>
+    <div class="flow" aria-hidden="true">
+      <svg viewBox="0 0 560 340">
+        <g stroke="#171a20" stroke-width="2.5" fill="#ffffff" stroke-linecap="round">
+          <rect x="40" y="90" width="70" height="120" rx="6"/>
+          <line x1="55" y1="122" x2="95" y2="122"/><line x1="55" y1="150" x2="95" y2="150"/><line x1="55" y1="178" x2="95" y2="178"/>
+          <rect x="255" y="180" width="90" height="80" rx="8"/>
+          <line x1="272" y1="205" x2="328" y2="205"/><line x1="272" y1="228" x2="328" y2="228"/>
+          <rect x="440" y="90" width="90" height="120" rx="6"/>
+          <polyline points="440,90 485,58 530,90" fill="none"/>
+          <rect x="462" y="130" width="20" height="30"/><rect x="496" y="130" width="20" height="30"/>
         </g>
-        <g font-family="inherit" font-size="13" fill="#5c5e62">
-          <text x="78" y="300">Baterie LFP</text>
-          <text x="300" y="300">Vaše spotřeba</text>
+        <path d="M95 150 C 180 150 200 220 300 220 C 380 220 400 150 480 150" fill="none" stroke="#c9d2e8" stroke-width="2.5" stroke-dasharray="1 7" stroke-linecap="round"/>
+        <g font-size="13" fill="#5c5e62" font-family="inherit">
+          <text x="42" y="240">Solární plot</text>
+          <text x="258" y="290">Baterie LFP</text>
+          <text x="442" y="240">Váš dům</text>
         </g>
       </svg>
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
     </div>
   </div>
 </section>
@@ -367,16 +517,11 @@
     <div class="sec__head rv">
       <p class="eyebrow">Konfigurátor</p>
       <h2>Sestavte si svůj plot</h2>
-      <p>Posuňte délku, zvolte orientaci a&nbsp;barvu. Cena i&nbsp;výnosy se přepočítají okamžitě.</p>
+      <p>Posuňte délku, zvolte orientaci a&nbsp;barvu. Cena i&nbsp;výnosy se přepočítají okamžitě — a&nbsp;plotem můžete otáčet.</p>
     </div>
     <div class="cfg rv">
       <div>
-        <div class="cfg__preview">
-          <svg viewBox="0 0 640 300" aria-label="Náhled plotu">
-            <rect width="640" height="300" fill="none"/>
-            <g id="cfgFence" transform="translate(40,40)"></g>
-          </svg>
-        </div>
+        <div class="ministage day" id="cfgStage" data-fence="3" data-wpc="#5a4032" aria-label="3D náhled vaší sestavy — tažením otočíte"></div>
         <div class="cfg__controls">
           <div class="ctl">
             <label for="len">Délka plotu <output id="lenOut">27,0 m · 15 polí</output></label>
@@ -487,76 +632,104 @@
 <script>
 (function(){
   "use strict";
-  /* ===== ceník (prodejní ceny vč. logiky z Excel ceníku, bez DPH) ===== */
-  var POLE = 10220;          // pole + DC + recyklace
-  var SLOUPEK = 2500;        // sloupek + patka + kotvení + výkop + osazení
-  var FIXED = 245150;        // systém + dokumentace + paušál + PDS + koncové lišty
-  var BAT_KWH = 6000;
-  var VAT = 1.21;
-  var EL = 5.5;              // Kč/kWh
-  var PLOT_BM = 5000;        // srovnávací designový plot Kč/bm
+  var REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* ===== ceník (prodejní logika z Excel ceníku, bez DPH) ===== */
+  var POLE = 10220, SLOUPEK = 2500, FIXED = 245150, BAT_KWH = 6000, VAT = 1.21, EL = 5.5, PLOT_BM = 5000;
   var fmtKc = function(x){ return Math.round(x).toLocaleString("cs-CZ") + " Kč"; };
   var fmt1 = function(x){ return x.toLocaleString("cs-CZ",{minimumFractionDigits:1,maximumFractionDigits:1}); };
 
-  /* ===== kreslení plotu (SVG) ===== */
-  function drawFence(gid, spans, opts){
-    var g = document.getElementById(gid);
-    if(!g) return;
-    opts = opts || {};
-    var wpc = opts.wpc || "#5a4032";
-    var s = opts.scale || 1;
-    var W = 150*s, H = 220*s, POST = 10*s, GAP = 4*s;
-    var html = "";
+  /* ============================================================
+     3D PLOT — stavba z divů + drag-to-rotate + jemné houpání
+     ============================================================ */
+  var SW = 200, PW = 16, STEP = SW + PW;
+  function buildFence(el, spans, wpc){
+    el.innerHTML = "";
+    var total = spans*STEP + PW;
+    var x0 = -total/2;
     for(var i=0;i<=spans;i++){
-      var x = i*(W+POST);
-      html += '<rect x="'+x+'" y="0" width="'+POST+'" height="'+(H+14*s)+'" rx="'+2*s+'" fill="#1b1f26"/>';
-      html += '<rect x="'+(x-2*s)+'" y="-6" width="'+(POST+4*s)+'" height="'+6*s+'" rx="'+2*s+'" fill="#2a2f37"/>';
+      var post = document.createElement("div");
+      post.className = "post";
+      post.style.transform = "translateX("+(x0 + i*STEP)+"px)";
+      post.innerHTML = '<i class="f"></i><i class="b"></i><i class="l"></i><i class="r"></i><span class="cap"></span><span class="lamp"></span>';
+      el.appendChild(post);
     }
     for(var j=0;j<spans;j++){
-      var fx = j*(W+POST)+POST;
-      /* dekorační pás */
-      html += '<rect x="'+fx+'" y="0" width="'+W+'" height="'+26*s+'" fill="#14181f"/>';
-      for(var d=0; d<6; d++){
-        html += '<circle cx="'+(fx+(d+0.5)*(W/6))+'" cy="'+13*s+'" r="'+3.2*s+'" fill="#e8e4da" opacity=".9"/>';
-      }
-      /* 3 panely */
-      for(var p=0;p<3;p++){
-        var py = 26*s + GAP + p*(52*s+GAP);
-        html += '<rect x="'+fx+'" y="'+py+'" width="'+W+'" height="'+52*s+'" fill="url(#panelG)"/>';
-        for(var c=1;c<8;c++){
-          html += '<line x1="'+(fx+c*(W/8))+'" y1="'+py+'" x2="'+(fx+c*(W/8))+'" y2="'+(py+52*s)+'" stroke="#2c3340" stroke-width="'+0.8*s+'"/>';
-        }
-        html += '<rect x="'+fx+'" y="'+py+'" width="'+W+'" height="'+52*s+'" fill="url(#glass)"/>';
-      }
-      /* WPC sokl */
-      var wy = 26*s + GAP + 3*(52*s+GAP);
-      html += '<rect class="wpcBoard" x="'+fx+'" y="'+wy+'" width="'+W+'" height="'+34*s+'" fill="'+wpc+'"/>';
-      html += '<line x1="'+fx+'" y1="'+(wy+17*s)+'" x2="'+(fx+W)+'" y2="'+(wy+17*s)+'" stroke="rgba(0,0,0,.25)" stroke-width="'+1.2*s+'"/>';
+      var sp = document.createElement("div");
+      sp.className = "span3";
+      sp.style.width = SW+"px";
+      sp.style.transform = "translateX("+(x0 + j*STEP + PW)+"px)";
+      sp.style.setProperty("--wpc", wpc);
+      sp.innerHTML = '<div class="face back"></div>'+
+        '<div class="face deco"></div>'+
+        '<div class="face cell c1"></div><div class="face cell c2"></div><div class="face cell c3"></div>'+
+        '<div class="face wpc"></div>';
+      el.appendChild(sp);
     }
-    g.innerHTML = html;
+  }
+  function makeInteractive(stage, f3d, opts){
+    opts = opts || {};
+    var baseX = opts.rx || -6, rotY = opts.ry || -16, target = rotY;
+    var sway = 0, t = Math.random()*100, dragging = false, lastX = 0;
+    function apply(){
+      f3d.style.transform = "rotateX("+baseX+"deg) rotateY("+(rotY+sway)+"deg)"+(opts.scale?" scale("+opts.scale+")":"");
+    }
+    function tick(){
+      if(!dragging){
+        if(!REDUCED){ t += 0.008; sway = Math.sin(t)*3; }
+        rotY += (target-rotY)*0.06;
+      }
+      apply();
+      requestAnimationFrame(tick);
+    }
+    stage.addEventListener("pointerdown", function(e){
+      dragging = true; lastX = e.clientX; stage.setPointerCapture(e.pointerId);
+      if(opts.onDrag) opts.onDrag();
+    });
+    stage.addEventListener("pointermove", function(e){
+      if(!dragging) return;
+      rotY += (e.clientX-lastX)*0.25; lastX = e.clientX;
+      rotY = Math.max(-52, Math.min(52, rotY));
+      target = rotY;
+    });
+    ["pointerup","pointercancel"].forEach(function(ev){
+      stage.addEventListener(ev, function(){ dragging = false; });
+    });
+    tick();
   }
 
-  /* hero + feature ploty — potřebují defs z hero SVG; feature SVG mají vlastní kontext,
-     proto tam gradient nahradíme plnou barvou */
-  drawFence("heroFence", 8, {scale:1.15});
-  drawFence("featFence1", 3, {scale:0.85});
-  drawFence("featFence2", 3, {scale:0.85, wpc:"#a97c50"});
-  drawFence("cfgFence", 4, {scale:0.9});
-  /* feature SVG nemají #panelG/#glass — doplníme lokální defs */
-  ["featFence1","featFence2","cfgFence"].forEach(function(id){
-    var g = document.getElementById(id);
-    if(!g) return;
-    var svg = g.ownerSVGElement;
-    if(svg && !svg.querySelector("defs")){
-      var src = document.querySelector(".hero__scene defs");
-      if(src) svg.insertBefore(src.cloneNode(true), svg.firstChild);
-    }
+  /* hero */
+  var heroF = document.getElementById("heroF");
+  buildFence(heroF, 5, "#5a4032");
+  var hint = document.getElementById("hint");
+  makeInteractive(document.getElementById("heroStage"), heroF, {
+    ry:-16, rx:-5, scale:.86, onDrag:function(){ hint.classList.add("gone"); }
   });
 
+  /* mini stages (sekce + konfigurátor) */
+  document.querySelectorAll(".ministage").forEach(function(st){
+    var f = document.createElement("div");
+    f.className = "f3d";
+    st.appendChild(f);
+    buildFence(f, +st.dataset.fence || 3, st.dataset.wpc || "#5a4032");
+    makeInteractive(st, f, {ry:-14, rx:-4, scale:.5});
+    st._fence = f;
+  });
+
+  /* den / noc */
+  var hero = document.querySelector(".hero");
+  function setMode(night){
+    hero.classList.toggle("night", night);
+    document.body.classList.toggle("nightmode", night);
+    document.getElementById("mDay").setAttribute("aria-pressed", String(!night));
+    document.getElementById("mNight").setAttribute("aria-pressed", String(night));
+  }
+  document.getElementById("mDay").addEventListener("click", function(){ setMode(false); });
+  document.getElementById("mNight").addEventListener("click", function(){ setMode(true); });
+
   /* ===== konfigurátor ===== */
-  var lenEl = document.getElementById("len");
   var state = { len:27, yield:650, wpc:"#5a4032", bat:false };
+  var cfgStage = document.getElementById("cfgStage");
 
   function calc(){
     var spans = Math.max(3, Math.round(state.len/1.8));
@@ -590,11 +763,10 @@
       nzu.textContent = "Pro podmínky NZÚ přidejte baterii" + (kwp<3 ? " a zvolte alespoň 7 polí (3 kWp)." : ".");
       nzu.className = "nzu";
     }
-    drawFence("cfgFence", Math.min(4, spans), {scale:0.9, wpc:state.wpc});
+    buildFence(cfgStage._fence, Math.min(3, spans), state.wpc);
   }
 
-  lenEl.addEventListener("input", function(){ state.len = +this.value; calc(); });
-
+  document.getElementById("len").addEventListener("input", function(){ state.len = +this.value; calc(); });
   document.querySelectorAll(".seg button").forEach(function(b){
     b.addEventListener("click", function(){
       document.querySelectorAll(".seg button").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
@@ -614,6 +786,22 @@
   document.getElementById("bat").addEventListener("change", function(){ state.bat = this.checked; calc(); });
   calc();
 
+  /* ===== count-up statistiky ===== */
+  function countUp(el){
+    var to = parseFloat(el.dataset.cnt), dec = +(el.dataset.dec||0);
+    if(REDUCED || to === 0){ el.textContent = to.toLocaleString("cs-CZ",{minimumFractionDigits:dec,maximumFractionDigits:dec}); return; }
+    var t0 = null;
+    function step(ts){
+      if(!t0) t0 = ts;
+      var p = Math.min(1,(ts-t0)/1100);
+      var eased = 1-Math.pow(1-p,3);
+      el.textContent = (to*eased).toLocaleString("cs-CZ",{minimumFractionDigits:dec,maximumFractionDigits:dec});
+      if(p<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  var statsDone = false;
+
   /* ===== nav + reveal ===== */
   var nav = document.getElementById("nav");
   window.addEventListener("scroll", function(){
@@ -621,7 +809,15 @@
   }, {passive:true});
 
   var io = new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.classList.add("in");
+      if(e.target.id==="stats" && !statsDone){
+        statsDone = true;
+        e.target.querySelectorAll("[data-cnt]").forEach(countUp);
+      }
+      io.unobserve(e.target);
+    });
   }, {threshold:.15});
   document.querySelectorAll(".rv").forEach(function(el){ io.observe(el); });
 })();
